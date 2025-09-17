@@ -19,6 +19,9 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
+      - name: Grant execute permission for Gradle wrapper
+        run: chmod +x ./gradlew
+
       - name: Cache Gradle
         uses: actions/cache@v3
         with:
@@ -30,7 +33,6 @@ jobs:
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
-
         with:
           name: app-debug
           path: app/build/outputs/apk/debug/app-debug.apk
