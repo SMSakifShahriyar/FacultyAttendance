@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Faculty Attendance</string>
+    <string name="login_title">Faculty Login</string>
+    <string name="email_hint">Email</string>
+    <string name="password_hint">Password</string>
+    <string name="login_button">Login</string>
+    <string name="check_in_button">Check In</string>
+    <string name="check_out_button">Check Out</string>
+    <string name="sign_out_button">Sign Out</string>
+    <string name="location_permission_required">Location permissions are required for attendance tracking.</string>
+    <string name="geofence_enter_message">You have entered the university area. Open app to check in.</string>
+    <string name="geofence_exit_message">You have left the university area. Remember to check out.</string>
+    <string name="attendance_success">Attendance recorded successfully!</string>
+    <string name="already_checked_in">Already checked in today.</string>
+    <string name="location_required">You must be inside the university premises to mark attendance.</string>
+</resources>
