@@ -17,11 +17,11 @@ class AuthRepository @Inject constructor(
         firebaseAuth.createUserWithEmailAndPassword(email, password).await()
     }
 
-    fun signOut() {
-        firebaseAuth.signOut()
+    suspend fun sendPasswordReset(email: String) {
+        firebaseAuth.sendPasswordResetEmail(email).await()
     }
 
+    fun signOut() = firebaseAuth.signOut()
     fun getCurrentUser() = firebaseAuth.currentUser
-
     fun isUserLoggedIn() = firebaseAuth.currentUser != null
 }
