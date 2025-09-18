@@ -3,18 +3,13 @@ package com.sakif.facultyattendance.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sakif.facultyattendance.repository.AuthRepository
+import com.sakif.facultyattendance.ui.SignInUiState
+import com.sakif.facultyattendance.util.AuthFormat
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-sealed class SignInUiState {
-    object Idle : SignInUiState()
-    object Loading : SignInUiState()
-    object Success : SignInUiState()
-    data class Error(val message: String) : SignInUiState()
-}
 
 @HiltViewModel
 class SignInViewModel @Inject constructor(
@@ -27,35 +22,40 @@ class SignInViewModel @Inject constructor(
     fun login(facultyId: String, password: String) {
         val id = facultyId.trim()
         if (id.isEmpty() || password.isEmpty()) {
-            _uiState.value = SignInUiState.Error("Enter Faculty ID and password")
+            _uiState.value = SignInUiState.Error("Please enter both Faculty ID and password")
             return
         }
         _uiState.value = SignInUiState.Loading
         viewModelScope.launch {
             try {
-                val email = com.sakif.facultyattendance.util.AuthFormat.idToEmail(id)
-                authRepository.signIn(email, password)
-                _uiState.value = SignInUiState.Success
+                // Attempt login with the given credentials
+                val isAuthenticated = authRepository.login(id, password)
+                _uiState.value = if (isAuthenticated) {
+                    SignInUiState.Success
+                } else {
+                    SignInUiState.Error("Invalid credentials")
+                }
             } catch (e: Exception) {
-                _uiState.value = SignInUiState.Error(e.message ?: "Login failed")
+                _uiState.value = SignInUiState.Error("Login failed: ${e.message}")
             }
         }
     }
 
+    // New function to handle forgot password
     fun forgotPassword(facultyId: String) {
         val id = facultyId.trim()
         if (id.isEmpty()) {
-            _uiState.value = SignInUiState.Error("Enter Faculty ID to reset password")
+            _uiState.value = SignInUiState.Error("Enter your Faculty ID first")
             return
         }
         viewModelScope.launch {
             try {
-                val email = com.sakif.facultyattendance.util.AuthFormat.idToEmail(id)
+                // Convert Faculty ID to email
+                val email = AuthFormat.idToEmail(id)
                 authRepository.sendPasswordReset(email)
-                // Keep UI idle after sending; you can surface a toast in UI
-                _uiState.value = SignInUiState.Idle
+                _uiState.value = SignInUiState.Success // Reset sent
             } catch (e: Exception) {
-                _uiState.value = SignInUiState.Error(e.message ?: "Could not send reset email")
+                _uiState.value = SignInUiState.Error("Failed to send reset email: ${e.message}")
             }
         }
     }
