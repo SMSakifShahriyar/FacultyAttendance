@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.FirebaseFirestore
 import com.sakif.facultyattendance.repository.AuthRepository
 import com.sakif.facultyattendance.util.FacultyIds
+import com.sakif.facultyattendance.util.AuthFormat
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,11 +22,12 @@ class SignUpViewModel @Inject constructor(
     val uiState: StateFlow<SignUpUiState> = _uiState
 
     fun register(facultyId: String, password: String) {
-        if (facultyId.isBlank() || password.length < 6) {
+        val id = facultyId.trim()
+        if (id.isEmpty() || password.length < 6) {
             _uiState.value = SignUpUiState.Error("Enter a valid Faculty ID and a 6+ char password")
             return
         }
-        if (!FacultyIds.allowed.contains(facultyId)) {
+        if (!FacultyIds.allowed.contains(id)) {
             _uiState.value = SignUpUiState.Error("Faculty ID not authorized")
             return
         }
@@ -33,24 +35,17 @@ class SignUpViewModel @Inject constructor(
         _uiState.value = SignUpUiState.Loading
         viewModelScope.launch {
             try {
-                // You can choose any deterministic email scheme; here we derive email from facultyId
-                val email = "$facultyId@faculty.attendance.app"
+                val email = AuthFormat.idToEmail(id)
                 authRepository.signUp(email, password)
 
                 val uid = authRepository.getCurrentUser()?.uid
-                    ?: throw IllegalStateException("No user after sign up")
+                    ?: error("No user after sign up")
 
-                // Save a minimal faculty profile
                 val profile = mapOf(
-                    "facultyId" to facultyId,
+                    "facultyId" to id,
                     "createdAt" to System.currentTimeMillis()
                 )
-
-                // Using set() to create/update the doc for this user
-                firestore.collection("faculties")
-                    .document(uid)
-                    .set(profile)
-                    .addOnFailureListener { /* no-op: handled by try/catch if awaited */ }
+                firestore.collection("faculties").document(uid).set(profile)
 
                 _uiState.value = SignUpUiState.Success
             } catch (e: Exception) {
