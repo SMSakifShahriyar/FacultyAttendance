@@ -18,6 +18,7 @@ class SignUpViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<SignUpUiState>(SignUpUiState.Idle)
     val uiState: StateFlow<SignUpUiState> = _uiState
 
+    // Sign-up function
     fun signUp(facultyId: String, password: String) {
         val id = facultyId.trim()
         if (id.isEmpty() || password.isEmpty()) {
@@ -27,9 +28,8 @@ class SignUpViewModel @Inject constructor(
         _uiState.value = SignUpUiState.Loading
         viewModelScope.launch {
             try {
-                // Sign up logic
-                val isSignedUp = authRepository.signUp(id, password)
-                _uiState.value = if (isSignedUp) {
+                val success = authRepository.signUp(id, password)
+                _uiState.value = if (success) {
                     SignUpUiState.Success
                 } else {
                     SignUpUiState.Error("Failed to sign up")
