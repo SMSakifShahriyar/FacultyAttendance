@@ -1,4 +1,4 @@
-package com.sakif.facultyattendance.viewmodel
+package com.sakif.facultyattendance.ui
 
 sealed class SignUpUiState {
     object Idle : SignUpUiState()
