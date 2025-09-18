@@ -19,6 +19,7 @@ class SignInViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<SignInUiState>(SignInUiState.Idle)
     val uiState: StateFlow<SignInUiState> = _uiState
 
+    // Login function
     fun login(facultyId: String, password: String) {
         val id = facultyId.trim()
         if (id.isEmpty() || password.isEmpty()) {
@@ -28,9 +29,8 @@ class SignInViewModel @Inject constructor(
         _uiState.value = SignInUiState.Loading
         viewModelScope.launch {
             try {
-                // Attempt login with the given credentials
-                val isAuthenticated = authRepository.login(id, password)
-                _uiState.value = if (isAuthenticated) {
+                val success = authRepository.login(id, password)
+                _uiState.value = if (success) {
                     SignInUiState.Success
                 } else {
                     SignInUiState.Error("Invalid credentials")
@@ -41,7 +41,7 @@ class SignInViewModel @Inject constructor(
         }
     }
 
-    // New function to handle forgot password
+    // Forgot password function
     fun forgotPassword(facultyId: String) {
         val id = facultyId.trim()
         if (id.isEmpty()) {
@@ -50,10 +50,9 @@ class SignInViewModel @Inject constructor(
         }
         viewModelScope.launch {
             try {
-                // Convert Faculty ID to email
                 val email = AuthFormat.idToEmail(id)
                 authRepository.sendPasswordReset(email)
-                _uiState.value = SignInUiState.Success // Reset sent
+                _uiState.value = SignInUiState.Success // Reset email sent
             } catch (e: Exception) {
                 _uiState.value = SignInUiState.Error("Failed to send reset email: ${e.message}")
             }
