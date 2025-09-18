@@ -41,4 +41,22 @@ class SignInViewModel @Inject constructor(
             }
         }
     }
+
+    fun forgotPassword(facultyId: String) {
+        val id = facultyId.trim()
+        if (id.isEmpty()) {
+            _uiState.value = SignInUiState.Error("Enter Faculty ID to reset password")
+            return
+        }
+        viewModelScope.launch {
+            try {
+                val email = com.sakif.facultyattendance.util.AuthFormat.idToEmail(id)
+                authRepository.sendPasswordReset(email)
+                // Keep UI idle after sending; you can surface a toast in UI
+                _uiState.value = SignInUiState.Idle
+            } catch (e: Exception) {
+                _uiState.value = SignInUiState.Error(e.message ?: "Could not send reset email")
+            }
+        }
+    }
 }
