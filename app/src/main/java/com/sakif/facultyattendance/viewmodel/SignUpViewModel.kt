@@ -5,13 +5,18 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.FirebaseFirestore
 import com.sakif.facultyattendance.repository.AuthRepository
 import com.sakif.facultyattendance.util.FacultyIds
-import com.sakif.facultyattendance.util.AuthFormat   // <- only this one import for AuthFormat
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+sealed class SignUpUiState {
+    object Idle : SignUpUiState()
+    object Loading : SignUpUiState()
+    object Success : SignUpUiState()
+    data class Error(val message: String) : SignUpUiState()
+}
 
 @HiltViewModel
 class SignUpViewModel @Inject constructor(
@@ -36,7 +41,7 @@ class SignUpViewModel @Inject constructor(
         _uiState.value = SignUpUiState.Loading
         viewModelScope.launch {
             try {
-                val email = AuthFormat.idToEmail(id)
+                val email = com.sakif.facultyattendance.util.AuthFormat.idToEmail(id)
                 authRepository.signUp(email, password)
 
                 val uid = authRepository.getCurrentUser()?.uid
