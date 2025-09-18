@@ -1,5 +1,8 @@
 package com.sakif.facultyattendance.util
 
 object AuthFormat {
-    fun idToEmail(id: String): String = "${id.trim()}@faculty.attendance.app"
+    fun idToEmail(facultyId: String): String {
+        // Simple conversion, change as necessary based on your logic
+        return "$facultyId@university.com"
+    }
 }
